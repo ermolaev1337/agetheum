@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  agetheum:
+    container_name: agetheum
+    build: .
+    env_file: .env
+    tty: true
+    command: bash
+    volumes:
+      - ./:/app/
+      - /app/node_modules
