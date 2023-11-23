@@ -25,17 +25,33 @@ describe("FactoryNFT", function () {
     describe("Request and receive certification", async () => {
 
         it("farmer should request certification, certifier should confirm it", async () => {
-
             const metadata = JSON.stringify({
                 "description": "Farmer ACT",
                 "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Vehn%C3%A4pelto_6.jpg/1599px-Vehn%C3%A4pelto_6.jpg",
                 "name": "Wheat",
-                "attributes": [
-                    {name: "Composts and Weed Suppressants", value: ["Original Potting Plus Mix", "Vegro Seed Mix"]},
-                    {name: "Fertilisers", value: ["Meadowsalt", "EPSO Combitop", "Zinc"]},
-                    {name: "Microorganisms", value: ["SlurryBugs Shift It", "Nutri-Life Tricho-Shield"]},
-                    {name: "Supplements", value: ["P870 Tracesure Lamb"]},
-                ]
+                "attributes": [{
+                    name: "organic", value: [
+                        {
+                            name: "Composts and Weed Suppressants",
+                            value: ["Original Potting Plus Mix", "Vegro Seed Mix"]
+                        },
+                        {
+                            name: "Fertilisers",
+                            value: ["Meadowsalt", "EPSO Combitop", "Zinc"]
+                        },
+                        {
+                            name: "Microorganisms",
+                            value: ["SlurryBugs Shift It", "Nutri-Life Tricho-Shield"]
+                        },
+                        {
+                            name: "Supplements",
+                            value: ["P870 Tracesure Lamb"]
+                        },
+                    ]
+                }, {
+                    name: "bundle",//TODO store hierarchically according to the bundling history
+                    value: [],
+                }]
             })
 
             const [factoryNFT, owner, farmer, certifier] = await deployContract();

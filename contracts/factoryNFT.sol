@@ -4,16 +4,24 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
+//TODO Bundling (of tokens when a new product consists of multiple certified components)
+//TODO Expiration (of tokens according to expiration of the corresponding certified products)
+//TODO Sharding (of tokens when predefined fractions of the certified product are going to be sold to different productions)
+//TODO Proof Range (of farm's coordinates for confirmation of the farm location)
 
 contract FactoryNFT is AccessControl, ERC721URIStorage {
     uint256 private _tokenIdCounter;
 
 //  Role-based access control
-    bytes32 public constant FARMER_ROLE = keccak256("FARMER_ROLE");
+    bytes32 public constant FARMER_ROLE = keccak256("FARMER_ROLE");//TODO farmer -> actor? to fit the
     bytes32 public constant CERTIFIER_ROLE = keccak256("CERTIFIER_ROLE");
 
     constructor() ERC721("Agricultural Certification Token", "ACT") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    }
+
+    function requestOnboarding() public  onlyRole(DEFAULT_ADMIN_ROLE) {//TODO
+//        _setupRole(FARMER_ROLE, msg.sender);
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl, ERC721URIStorage) returns (bool){
@@ -46,5 +54,12 @@ contract FactoryNFT is AccessControl, ERC721URIStorage {
         _setTokenURI(_tokenIdCounter, tokenURI);
 
         return ++_tokenIdCounter;
+    }
+
+    function bundleTokens(address[] memory _holders, string[] memory tokenURIs) public onlyRole(CERTIFIER_ROLE) {
+        require(_holders.length == tokenURIs.length, "Arrays must be of equal length");
+        for (uint i = 0; i < _holders.length; i++) {
+            createToken(_holders[i], tokenURIs[i]);
+        }
     }
 }
