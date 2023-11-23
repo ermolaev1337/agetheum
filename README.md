@@ -3,9 +3,10 @@
 `Owner` - The owner of the platform. The owner is the only one who can grant roles of `Actor` and `Certifier` to other
 users. The owner is the only one who can confirm on-boarding requests from `Actors` and `Certifiers`.
 
-`Actor` - Farmer, Producer, Distributor, etc.
+`Actor` - Farmer, Producer, Distributor, etc. The `Actor` is the one who requests certification tokens for his product.
 
-`Certifier` - Certifier of the products (e.g. Organic, Fair Trade, etc.)
+`Certifier` - Certifier of the products (e.g. Organic, Fair Trade, etc.) The `Certifier` is the one who confirms the
+requests from `Actors` and issues certification tokens.
 
 # User journey on the web application
 
@@ -27,7 +28,8 @@ On-boarding requests is pending until the `Owner` confirms it.
 `Owner` grants roles of `Actor` and `Certifier` by confirming the
 on-boarding requests.
 `Actors`, and `Certifiers` receive a notification (as an email, SMS, etc.) that on-boarding request is confirmed.
-`Actors` start having access to Actor Dashboard. `Certifiers` start having access to Certifier Dashboard,
+`Actors` start having access to Actor Dashboard.
+`Certifiers` start having access to Certifier Dashboard,
 
 # Certification Token Lifecycle
 
@@ -45,37 +47,36 @@ on-boarding requests.
 7) When `Actor` sells his product to `Producer` (also, an `Actor`) and transfer the corresponding certification token to
    him.
 8) `Producer` collects all the certification tokens from different `Actors` and requests bundling them into one token
-   for the
-   final product.
+   for the final product.
 9) `Certifier` sees the request for bundling and takes it to work on it.
 10) If everything as `Producer` claimed, `Certifier` confirms the request.
 11) `Producer` receives the token which includes information about all the initial certification tokens from `Actors`
-    who
-    have contributed to the final in the `bundle` attribute within the metadata
-    product.
+    who have contributed to the final in the `bundle` attribute within the metadata product.
 
 ## Expiration
 
 - Each certification token must include `expiration` attribute within the metadata which is the date when the
   certification token expires.
-- The attributes `expiration` represents when the certified product expires and its corresponding certification token
+- The attribute `expiration` represents when the certified product expires and its corresponding certification token
   becomes invalid.
 
 ## Sharding
 
 - Sometimes the certified product is going to be sold to different productions.
-- In this case, `Actor` requests sharding the certification token into predefined fractions.
-- `Certifier` sees the request for sharding and takes it to work on it.
+- In this case, `Actor` requests sharding of the certification token into shards - multiple certification tokens which
+  represent certain proportions of the certified product.
+- `Certifier` sees the request for sharding and takes them to work on.
 - If everything as `Actor` claimed, `Certifier` confirms the sharding request.
-- `Actor` receives the new tokens which include information about the initial certification token in the `sharding`
+- `Actor` receives the new certification tokens which include information about the initial certification token in the `sharding`
   attribute within the metadata.
 
 ## Proof Range
 
-- For some certificates `Actor` has to proof the land where product is grown or produced.
-- Using zkSNARK, `Actor` generates Proof Range for the location of his production without disclosing his location
+- For some certificated products `Actor` has to proof the land where product is grown or produced.
+- Using zkSNARK, `Actor` generates Proof Range for the location of his production without disclosing his location.
 - The Proof Range proves that the location of production of the `Actor` is within the range of the coordinates which
   is claimed by the `Actor`.
+- This functionality will involve Verifiable Credentials.
 
 # Roadmap
 

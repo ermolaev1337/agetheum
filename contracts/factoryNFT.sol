@@ -39,13 +39,14 @@ contract FactoryNFT is AccessControl, ERC721URIStorage {
         addressToMetadataCertificationRequests[msg.sender] = _metadata;
     }
 
+    //TODO implement acceptCertificationRequest(address _actorAddress) as a function to be called by the certifier when he starts the certification process
+
     function approveCertification(address _actorAddress) public onlyRole(CERTIFIER_ROLE) returns (uint) {//TODO reentrancy guard
         uint _tokenCounter = createToken(_actorAddress, addressToMetadataCertificationRequests[_actorAddress]);
         delete addressToMetadataCertificationRequests[_actorAddress];
 
         return _tokenCounter;
     }
-
 
     // TOKEN MINTING
     uint256 private _tokenIdCounter;
