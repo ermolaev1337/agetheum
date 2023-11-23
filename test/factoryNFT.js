@@ -6,17 +6,23 @@ const hre = require("hardhat");
 
 
 describe("FactoryNFT", function () {
-    const deployContract = async () => {
+    const deployContractRequestAndApproveRoles = async () => {
         const [_owner, _farmer, _certifier] = await ethers.getSigners();
 
         const FactoryNFTContract = await ethers.getContractFactory("FactoryNFT");
         const factoryNFT = await FactoryNFTContract.deploy();
 
-        const tx1 = await factoryNFT.connect(_owner).grantFarmerRole(_farmer.address);
+        const tx1 = await factoryNFT.connect(_farmer).requestActorRole();
         await tx1.wait();
 
-        const tx2 = await factoryNFT.connect(_owner).grantCertifierRole(_certifier.address);
+        const tx2 = await factoryNFT.connect(_certifier).requestCertifierRole();
         await tx2.wait();
+
+        const tx3 = await factoryNFT.connect(_owner).approveRole(_farmer.address);
+        await tx3.wait();
+
+        const tx4 = await factoryNFT.connect(_owner).approveRole(_certifier.address);
+        await tx4.wait();
 
         return [factoryNFT, _owner, _farmer, _certifier]
     }
@@ -54,23 +60,21 @@ describe("FactoryNFT", function () {
                 }]
             })
 
-            const [factoryNFT, owner, farmer, certifier] = await deployContract();
+            const [factoryNFT, owner, farmer, certifier] = await deployContractRequestAndApproveRoles();
 
             const requestCertificationTx = await factoryNFT.connect(farmer).requestCertification(metadata);
             await requestCertificationTx.wait();
 
-            const dictBefore = await factoryNFT.connect(farmer).addressToTokenURI(farmer.address)
+            const dictBefore = await factoryNFT.connect(farmer).addressToMetadataCertificationRequests(farmer.address)
             expect(metadata).to.be.equal(dictBefore);
 
             const approveCertificationTx = await factoryNFT.connect(certifier).approveCertification(farmer.address);
             const approveCertificationTxMined = await approveCertificationTx.wait();
-            // console.debug("approveCertificationTx", approveCertificationTx)
-            // expect(approveCertificationTx).to.be.equal(1)
 
-            const dictAfter = await factoryNFT.connect(farmer).addressToTokenURI(farmer.address)
+            const dictAfter = await factoryNFT.connect(farmer).addressToMetadataCertificationRequests(farmer.address)
             expect("").to.be.equal(dictAfter);
 
-            // // Extract the token ID from the transaction event
+            // Extract the token ID from the transaction event
             const event = approveCertificationTxMined.events[0];
             const value = event.args[2];
             const tokenId = value.toNumber(); // Getting the tokenID
@@ -78,7 +82,6 @@ describe("FactoryNFT", function () {
             // Retrieve the token URI and compare it with the metadata
             const tokenURI = await factoryNFT.tokenURI(tokenId); // Using the tokenURI from ERC721 to retrieve the metadata
             expect(tokenURI).to.be.equal(metadata); // Comparing and testing
-
         });
     });
 });

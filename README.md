@@ -23,11 +23,9 @@ At this moment Farmer has requested on-boarding
 
 On-boarding requests is pending until the `Owner` confirms it.
 
-`Owner` sees the on-boarding requests on the Admin Panel, and grants roles of `Actor` and `Certifier` by confirming the
+`Owner` sees the on-boarding requests on the Admin Panel.
+`Owner` grants roles of `Actor` and `Certifier` by confirming the
 on-boarding requests.
-
-# Confirmation of on-boarding requests from Actors and Certifiers from the `Owner` perspective
-
 `Actors`, and `Certifiers` receive a notification (as an email, SMS, etc.) that on-boarding request is confirmed.
 `Actors` start having access to Actor Dashboard. `Certifiers` start having access to Certifier Dashboard,
 

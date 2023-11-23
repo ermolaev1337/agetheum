@@ -4,62 +4,56 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
-//TODO Bundling (of tokens when a new product consists of multiple certified components)
-//TODO Expiration (of tokens according to expiration of the corresponding certified products)
-//TODO Sharding (of tokens when predefined fractions of the certified product are going to be sold to different productions)
-//TODO Proof Range (of farm's coordinates for confirmation of the farm location)
-
 contract FactoryNFT is AccessControl, ERC721URIStorage {
-    uint256 private _tokenIdCounter;
-
-//  Role-based access control
-    bytes32 public constant FARMER_ROLE = keccak256("FARMER_ROLE");//TODO farmer -> actor? to fit the
-    bytes32 public constant CERTIFIER_ROLE = keccak256("CERTIFIER_ROLE");
 
     constructor() ERC721("Agricultural Certification Token", "ACT") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-    }
-
-    function requestOnboarding() public  onlyRole(DEFAULT_ADMIN_ROLE) {//TODO
-//        _setupRole(FARMER_ROLE, msg.sender);
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl, ERC721URIStorage) returns (bool){
         return super.supportsInterface(interfaceId);
     }
 
-    function grantFarmerRole(address _address) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        _grantRole(FARMER_ROLE, _address);
+    // ON-BOARDING
+    mapping(address => bytes32) public addressToRoleOnboardingRequests;//TODO reentrancy
+    bytes32 public constant ACTOR_ROLE = keccak256("ACTOR_ROLE");
+    bytes32 public constant CERTIFIER_ROLE = keccak256("CERTIFIER_ROLE");
+
+    function requestActorRole() public {//TODO revert, if address is already in the map
+        addressToRoleOnboardingRequests[msg.sender] = ACTOR_ROLE;
     }
 
-    function grantCertifierRole(address _address) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        _grantRole(CERTIFIER_ROLE, _address);
+    function requestCertifierRole() public {//TODO revert, if address is already in the map
+        addressToRoleOnboardingRequests[msg.sender] = CERTIFIER_ROLE;
     }
 
-    mapping(address => string) public addressToTokenURI;//TODO deal with array of tokenURIs for each address (farmer)
-
-    function requestCertification(string memory tokenURI) public onlyRole(FARMER_ROLE) {
-        addressToTokenURI[msg.sender] = tokenURI;
+    function approveRole(address _requesterAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        _grantRole(addressToRoleOnboardingRequests[_requesterAddress], _requesterAddress);
+        delete addressToRoleOnboardingRequests[_requesterAddress];
     }
 
-    function approveCertification(address farmerAddress) public onlyRole(CERTIFIER_ROLE) returns (uint) {//TODO reentrancy guard
-        uint _tokenCounter = createToken(farmerAddress, addressToTokenURI[farmerAddress]);
-        delete addressToTokenURI[farmerAddress];
+    // CERTIFICATION REQUEST
+    mapping(address => string) public addressToMetadataCertificationRequests;//TODO reentrancy
+
+    function requestCertification(string memory _metadata) public onlyRole(ACTOR_ROLE) {//TODO implement array of metadata for each actors
+        addressToMetadataCertificationRequests[msg.sender] = _metadata;
+    }
+
+    function approveCertification(address _actorAddress) public onlyRole(CERTIFIER_ROLE) returns (uint) {//TODO reentrancy guard
+        uint _tokenCounter = createToken(_actorAddress, addressToMetadataCertificationRequests[_actorAddress]);
+        delete addressToMetadataCertificationRequests[_actorAddress];
 
         return _tokenCounter;
     }
+
+
+    // TOKEN MINTING
+    uint256 private _tokenIdCounter;
 
     function createToken(address _holder, string memory tokenURI) private returns (uint) {
         _mint(_holder, _tokenIdCounter);
         _setTokenURI(_tokenIdCounter, tokenURI);
 
         return ++_tokenIdCounter;
-    }
-
-    function bundleTokens(address[] memory _holders, string[] memory tokenURIs) public onlyRole(CERTIFIER_ROLE) {
-        require(_holders.length == tokenURIs.length, "Arrays must be of equal length");
-        for (uint i = 0; i < _holders.length; i++) {
-            createToken(_holders[i], tokenURIs[i]);
-        }
     }
 }
